@@ -58,9 +58,16 @@
         <Grid Grid.Column="1">
             <Grid Name="PlayersGrid" Visibility="{Binding PlayersVisibility}">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <DataGrid Name="PlayersDataGrid" ItemsSource="{Binding Players}" AutoGenerateColumns="True" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True">
+                <TextBox Grid.Row="0"
+                         Margin="0,0,0,8"
+                         Height="30"
+                         VerticalContentAlignment="Center"
+                         ToolTip="Szukaj po imieniu lub nazwisku"
+                         Text="{Binding PlayersSearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                <DataGrid Grid.Row="1" Name="PlayersDataGrid" ItemsSource="{Binding PlayersView}" AutoGenerateColumns="True" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True">
                 </DataGrid>
             </Grid>
             <Grid Name="TournamentsGrid" Visibility="{Binding TournamentsVisibility}">
@@ -210,7 +217,6 @@
                     <Button Content="Wyeksportuj turnieje" Command="{Binding ExportTournamentsCommand}"></Button>
                     <Button Content="Wyeksportuj mecze" Command="{Binding ExportMatchesCommand}"></Button>
                     <Button Content="Wyeksportuj użytkowników" Command="{Binding ExportUsersCommand}"></Button>
-                    <Button Content="Wyeksportuj pary użytkownik-turniej" Command="{Binding ExportPlayerTournamentPairsCommand}"></Button>
                 </StackPanel>
             </Grid>
         </Grid>

@@ -38,6 +38,9 @@ namespace TournamentManager
         }
 
         public static bool CanViewUsers(Permission role) => role >= Permission.Employee;
+        public static bool CanDeleteUsers(Permission executorRole, Permission targetRole) =>
+            executorRole == Permission.Superadmin ||
+            (executorRole == Permission.Admin && targetRole is Permission.Guest or Permission.Employee);
         public static bool CanModifyMatches(Permission role) => role >= Permission.Employee;
         public static bool CanAssignPlayers(Permission role) => role >= Permission.Employee;
         public static bool CanAddTournaments(Permission role) => role >= Permission.Admin;

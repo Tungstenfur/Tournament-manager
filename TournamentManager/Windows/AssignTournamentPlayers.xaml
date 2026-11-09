@@ -12,6 +12,7 @@
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -20,7 +21,15 @@
                    FontWeight="Bold"
                    Margin="0,0,0,10"/>
 
-        <DataGrid Grid.Row="1"
+        <TextBox Grid.Row="1"
+                 Name="SearchTextBox"
+                 Margin="0,0,0,8"
+                 Height="30"
+                 VerticalContentAlignment="Center"
+                 ToolTip="Szukaj po imieniu lub nazwisku"
+                 TextChanged="SearchTextBox_TextChanged"/>
+
+        <DataGrid Grid.Row="2"
                   Name="PlayersAssignmentDataGrid"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
@@ -35,10 +44,9 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
             <Button Content="Zapisz" Width="100" Click="SaveButton_Click"/>
             <Button Content="Anuluj" Width="100" Click="CancelButton_Click"/>
         </StackPanel>
     </Grid>
 </Window>
-

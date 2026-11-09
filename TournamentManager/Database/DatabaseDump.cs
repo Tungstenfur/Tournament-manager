@@ -26,5 +26,4 @@ internal class DatabaseDump
         var user = DatabaseUsers.GetUsers();
         return JsonSerializer.Serialize(user);
     }
-    
 }

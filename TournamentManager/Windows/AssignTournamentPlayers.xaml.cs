@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace TournamentManager.Windows;
 
@@ -8,6 +10,7 @@ public partial class AssignTournamentPlayers : Window
 {
     private readonly Tournament _tournament;
     private readonly ObservableCollection<PlayerAssignmentItem> _items;
+    private readonly ICollectionView _itemsView;
 
     public AssignTournamentPlayers(Tournament tournament, IEnumerable<Player> allPlayers)
     {
@@ -23,8 +26,26 @@ public partial class AssignTournamentPlayers : Window
                 .ThenBy(player => player.Name)
                 .Select(player => new PlayerAssignmentItem(player, assignedIds.Contains(player.Id))));
 
-        PlayersAssignmentDataGrid.ItemsSource = _items;
+        _itemsView = CollectionViewSource.GetDefaultView(_items);
+        _itemsView.Filter = FilterPlayer;
+        PlayersAssignmentDataGrid.ItemsSource = _itemsView;
         TournamentLabel.Text = $"Turniej: {_tournament.Name}";
+    }
+
+    private bool FilterPlayer(object item)
+    {
+        if (item is not PlayerAssignmentItem assignment) return false;
+        var searchText = SearchTextBox.Text.Trim();
+        if (searchText.Length == 0) return true;
+
+        return assignment.Player.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+            || assignment.Player.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+            || assignment.Player.DisplayName.Contains(searchText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _itemsView.Refresh();
     }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -82,4 +103,3 @@ public partial class AssignTournamentPlayers : Window
         public event PropertyChangedEventHandler? PropertyChanged;
     }
 }
-

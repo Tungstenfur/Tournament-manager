@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using TournamentManager.Enums;
 using System.Collections.Specialized;
@@ -17,6 +18,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private Tournament? _selectedTournament;
 
     public ObservableCollection<Player> Players { get; } = new(Database.DatabasePlayer.GetPlayers());
+    public ICollectionView PlayersView { get; }
     public ObservableCollection<Tournament> Tournaments { get; } = new(Database.DatabaseTournament.GetTournaments());
     public ObservableCollection<Match> Matches { get; } = new(Database.DatabaseMatch.GetMatches());
     public ObservableCollection<User> Users { get; } = new();
@@ -51,6 +53,17 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public Visibility MatchesVisibility => IsMatchesVisible ? Visibility.Visible : Visibility.Collapsed;
     public Visibility UsersVisibility => IsUsersVisible ? Visibility.Visible : Visibility.Collapsed;
     public Visibility AdministrationVisibility => IsAdministrationVisible ? Visibility.Visible : Visibility.Collapsed;
+    public string PlayersSearchText
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            OnPropertyChanged(nameof(PlayersSearchText));
+            PlayersView.Refresh();
+        }
+    } = string.Empty;
     public bool CanViewUsers => User.CanViewUsers(_permission);
     public bool CanModifyMatches => User.CanModifyMatches(_permission);
     public bool CanAssignPlayers => User.CanAssignPlayers(_permission);
@@ -83,6 +96,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public MainWindowViewModel(Permission permission)
     {
         _permission = permission;
+        PlayersView = CollectionViewSource.GetDefaultView(Players);
+        PlayersView.Filter = FilterPlayer;
         if (CanViewUsers)
         {
             foreach (var user in Database.DatabaseUsers.GetUsers())
@@ -101,6 +116,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowUsersCommand = new RelayCommand(() => CurrentView = "Users", () => CanViewUsers);
         ShowAdministrationCommand = new RelayCommand(() => CurrentView = "Administration",()=>IsAdmin);
         ExportPlayersCommand = new RelayCommand(()=>SaveToFile(DatabaseDump.DumpPlayers()));
+        ExportTournamentsCommand = new RelayCommand(()=>SaveToFile(DatabaseDump.DumpTournaments()));
+        ExportPlayersCommand = new RelayCommand(()=>SaveToFile(DatabaseDump.DumpPlayers()));
+        ExportMatchesCommand = new RelayCommand(()=>SaveToFile(DatabaseDump.DumpMatches()));
+        ExportUsersCommand = new RelayCommand(()=>SaveToFile(DatabaseDump.DumpUsers()));
         LogoutCommand = new RelayCommand(Logout);
         ShowTournamentMatchesCommand = new RelayCommand<Tournament>(tournament =>
         {
@@ -112,9 +131,20 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         GenerateNextRoundCommand = new RelayCommand(GenerateNextRound, () => CanModifyMatches);
         AddUserCommand = new RelayCommand(AddUser, () => CanViewUsers);
         EditUserCommand = new RelayCommand<User>(EditUser, user => user is not null && User.CanEditUsers(_permission, user.Role));
-        DeleteUserCommand = new RelayCommand<User>(DeleteUser, _ => false);
+        DeleteUserCommand = new RelayCommand<User>(DeleteUser,
+            user => user is not null && User.CanDeleteUsers(_permission, user.Role));
 
         foreach (var match in Matches) NormalizeMatchReferences(match);
+    }
+
+    private bool FilterPlayer(object item)
+    {
+        if (item is not Player player) return false;
+        if (string.IsNullOrWhiteSpace(PlayersSearchText)) return true;
+
+        return player.Name.Contains(PlayersSearchText, StringComparison.OrdinalIgnoreCase)
+            || player.LastName.Contains(PlayersSearchText, StringComparison.OrdinalIgnoreCase)
+            || player.DisplayName.Contains(PlayersSearchText, StringComparison.OrdinalIgnoreCase);
     }
 
     private void AssignTournamentPlayers(Tournament? tournament)
@@ -149,7 +179,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         if (user is null || MessageBox.Show($"Czy na pewno chcesz usunąć użytkownika {user.Username}?",
                 "Potwierdzenie", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-        if (!User.CanEditUsers(_permission, user.Role)) return;
+        if (!User.CanDeleteUsers(_permission, user.Role)) return;
         Database.DatabaseUsers.DeleteUser(user.Id);
         RefreshUsers();
     }
