@@ -1,0 +1,44 @@
+<Window x:Class="TournamentManager.Windows.AssignTournamentPlayers"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Przypisywanie graczy do turnieju"
+        Height="420"
+        Width="620"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanMinimize">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Name="TournamentLabel"
+                   FontWeight="Bold"
+                   Margin="0,0,0,10"/>
+
+        <DataGrid Grid.Row="1"
+                  Name="PlayersAssignmentDataGrid"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  IsReadOnly="False">
+            <DataGrid.Columns>
+                <DataGridCheckBoxColumn Header="Przypisany"
+                                        Binding="{Binding IsAssigned, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <DataGridTextColumn Header="Imię" Binding="{Binding Player.Name}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Nazwisko" Binding="{Binding Player.LastName}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Data urodzenia" Binding="{Binding Player.BirthDate}" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Zapisz" Width="100" Click="SaveButton_Click"/>
+            <Button Content="Anuluj" Width="100" Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
+

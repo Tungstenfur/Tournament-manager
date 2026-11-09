@@ -1,0 +1,21 @@
+﻿<Window x:Class="TournamentManager.Windows.RegisterFirstUser"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TournamentManager.Windows"
+        mc:Ignorable="d"
+        Title="RegisterFirstUser" Height="450" Width="300">
+    <Grid>
+        <StackPanel>
+            <Label FontSize="20">Utwórz pierwszego użytkownika</Label>
+            <Label>Login</Label>
+            <TextBox Name="usernameBox"></TextBox>
+            <Label>Hasło</Label>
+            <PasswordBox Name="passwordBox"></PasswordBox>
+            <Label>Powtórz hasło</Label>
+            <PasswordBox Name="repeatPasswordBox"></PasswordBox>
+            <Button Name="registerButton" Content="Zarejestruj" Click="registerButton_Click"></Button>
+        </StackPanel>
+    </Grid>
+</Window>

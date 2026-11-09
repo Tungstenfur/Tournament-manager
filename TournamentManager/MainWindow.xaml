@@ -1,0 +1,218 @@
+﻿<Window x:Class="TournamentManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TournamentManager"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Background" Value="#FF007ACC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FF005A9E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF005A9E"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#FF003F6B"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#CCCCCC"/>
+                                <Setter Property="Foreground" Value="#888888"/>
+                                <Setter Property="BorderBrush" Value="#AAAAAA"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+            <StackPanel>
+                <Button FontSize="16" Command="{Binding ShowTournamentsCommand}">Turnieje</Button>
+                <Button FontSize="16" Command="{Binding ShowMatchesCommand}">Mecze</Button>
+                <Button FontSize="16" Command="{Binding ShowPlayersCommand}" IsEnabled="{Binding CanEditPlayers}">Gracze</Button>
+                <Button FontSize="16" Command="{Binding ShowUsersCommand}" IsEnabled="{Binding CanViewUsers}">Użytkownicy</Button>
+                <Button FontSize="16" Command="{Binding ShowAdministrationCommand}" IsEnabled="{Binding IsAdmin}">Administracja</Button>
+            </StackPanel>
+        <Grid Grid.Column="1">
+            <Grid Name="PlayersGrid" Visibility="{Binding PlayersVisibility}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <DataGrid Name="PlayersDataGrid" ItemsSource="{Binding Players}" AutoGenerateColumns="True" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True">
+                </DataGrid>
+            </Grid>
+            <Grid Name="TournamentsGrid" Visibility="{Binding TournamentsVisibility}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <DataGrid Name="TournamentsDataGrid" ItemsSource="{Binding Tournaments}" AutoGenerateColumns="False" CanUserAddRows="{Binding CanAddTournaments}" CanUserDeleteRows="False" IsReadOnly="{Binding TournamentsReadOnly}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nazwa" Binding="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <DataGridTextColumn Header="Data" Binding="{Binding Date, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <DataGridTextColumn Header="Liczba graczy" Binding="{Binding Players}" IsReadOnly="True"/>
+                        <DataGridTemplateColumn Header="Zwycięzca">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Winner.DisplayName}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding WinnerOptions}"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectedItem="{Binding Winner, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Mecze">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Pokaż mecze" Command="{Binding DataContext.ShowTournamentMatchesCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Gracze">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Przypisz graczy" Command="{Binding DataContext.AssignTournamentPlayersCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+            <Grid Name="MatchesGrid" Visibility="{Binding MatchesVisibility}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <DataGrid Grid.Row="0" Name="MatchesDataGrid" ItemsSource="{Binding Matches}" AutoGenerateColumns="False" CanUserAddRows="{Binding CanModifyMatches}" CanUserDeleteRows="False" IsReadOnly="{Binding MatchesReadOnly}">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Turniej">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Tournament.DisplayName}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding DataContext.Tournaments, RelativeSource={RelativeSource AncestorType=Window}}"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectedItem="{Binding Tournament, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Gracz 1">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Player1.DisplayName}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding DataContext.Players, RelativeSource={RelativeSource AncestorType=Window}}"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectedItem="{Binding Player1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Gracz 2">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Player2.DisplayName}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding DataContext.Players, RelativeSource={RelativeSource AncestorType=Window}}"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectedItem="{Binding Player2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Zwycięzca">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Winner.DisplayName}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding WinnerOptions}"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectedItem="{Binding Winner, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Runda" Binding="{Binding Round}" IsReadOnly="True"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Content="Losuj mecze" Command="{Binding GenerateRandomMatchesCommand}"/>
+                    <Button Content="Generuj następną rundę" Command="{Binding GenerateNextRoundCommand}"/>
+                </StackPanel>
+            </Grid>
+            <Grid Name="UsersGrid" Visibility="{Binding UsersVisibility}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="5*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <DataGrid Name="UsersDataGrid" ItemsSource="{Binding Users}" IsReadOnly="True" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Width="*" Binding="{Binding Id}"/>
+                        <DataGridTextColumn Header="Nazwa użytkownika" Width="*" Binding="{Binding Username}"/>
+                        <DataGridTextColumn Header="Rola" Width="*" Binding="{Binding Role}"/>
+                        <DataGridTemplateColumn Header="Akcje" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid HorizontalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Content="Edytuj" Style="{x:Null}" Margin="0,0,10,0" Command="{Binding DataContext.EditUserCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Padding="1"/>
+                                        <Button Content="Usuń" Style="{x:Null}" Grid.Column="1" Margin="0" Command="{Binding DataContext.DeleteUserCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Padding="1"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button Name="AddUserButton" Content="Dodaj użytkownika" Width="200" Height="40" Command="{Binding AddUserCommand}" IsEnabled="{Binding CanViewUsers}"/>
+                </Grid>
+            </Grid>
+            <Grid Name="AdministrationGrid" Visibility="{Binding AdministrationVisibility}">
+                <StackPanel>
+                    <Button Content="Wyeksportuj graczy" Command="{Binding ExportPlayersCommand}"></Button>
+                    <Button Content="Wyeksportuj turnieje" Command="{Binding ExportTournamentsCommand}"></Button>
+                    <Button Content="Wyeksportuj mecze" Command="{Binding ExportMatchesCommand}"></Button>
+                    <Button Content="Wyeksportuj użytkowników" Command="{Binding ExportUsersCommand}"></Button>
+                    <Button Content="Wyeksportuj pary użytkownik-turniej" Command="{Binding ExportPlayerTournamentPairsCommand}"></Button>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
